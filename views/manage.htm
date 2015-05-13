@@ -1,0 +1,98 @@
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header">
+                <div class="box-name">
+                    <i class="fa fa-cogs"></i>
+                    <span>{{ t('videoconverter::strings.videos') }}</span>
+
+                </div>
+
+                <div class="no-move"></div>
+            </div>
+            <div class="box-content no-padding clearfix" >
+                @foreach ($videos as $video)
+                <div class="box col-md-3 no-padding widget-box">
+                    <div class="box-header">
+                        <div class="box-name">
+                            <span>{{$video->title}}</span>
+                        </div>
+                        <div class="box-icons" >
+                            <span title="{{ t('videoconverter::strings.duration') }}" class="ttips badge bg-primary">{{ $video->duration }}s</span>
+                            <span title="{{ t('videoconverter::strings.dimensions') }}" class="ttips badge bg-primary">{{$video->width}}x{{$video->height}}</span>
+
+                        </div>
+                    </div>
+                    <div class="box-content scrollbars">
+                        @if($video->type=='video/x-flv' || $video->type=='video/mp4')
+                        <object width="{{$video->width}}" height="{{$video->height}}" type="application/x-shockwave-flash" data="{{plugins_url()}}/videoconverter/vendor/flashmediaelement.swf">
+                            <param name="movie" value="{{plugins_url()}}/videoconverter/vendor/flashmediaelement.swf" />
+                            <param name="flashvars" value="controls=true&file={{$video->path}}" />
+                            <param name="wmode" value="opaque">
+
+                        </object>
+                        @elseif($video->type=='video/mpeg' || $video->type=='video/3gpp' || $video->type=='video/x-ms-wmv')
+                        <object class="img-responsive" id="MediaPlayer1" CLASSID="CLSID:22d6f312-b0f6-11d0-94ab-0080c74c7e95" codebase="http://activex.microsoft.com/activex/controls/mplayer/en/nsmp2inf.cab#Version=5,1,52,701"
+                                standby="Loading Microsoft Windows® Media Player components..." type="application/x-oleobject" width="{{$video->width}}" height="{{$video->height}}">
+                            <param name="fileName" value="{{$video->path}}">
+                            <param name="animationatStart" value="true">
+                            <param name="transparentatStart" value="true">
+                            <param name="autoStart" value="false">
+                            <param name="showControls" value="true">
+                            <param name="Volume" value="-450">
+                            <param name="wmode" value="opaque">
+                            <embed class="img-responsive" type="application/x-mplayer2" pluginspage="http://www.microsoft.com/Windows/MediaPlayer/" src="{{$video->path}}" name="MediaPlayer1" width="{{$video->width}}" height="{{$video->height}}" autostart="0" showcontrols="1" volume="-450">
+                        </object>
+                        @else
+                        <video id="video_{{$video->id}}" width="{{$video->width}}" height="{{$video->height}}" controls class="img-responsive">
+                            <source src="{{$video->path}}"
+                                    type='@if($video->type=="video/mp4") {{$video->type}}; codecs="amp4v.20.8, mp4a.40.2" @elseif($video->type=="video/mpeg") video/mp4; codecs="avc1.42E01E, mp4a.40.2" @elseif($video->type=="video/ogg") {{$video->type}};  codecs="theora, vorbis" @else {{$video->type}} @endif'>
+                            <object width="{{$video->width}}" height="{{$video->height}}" type="application/x-shockwave-flash" data="{{plugins_url()}}/videoconverter/vendor/flashmediaelement.swf">
+                                <param name="movie" value="{{plugins_url()}}/videoconverter/vendor/flashmediaelement.swf" />
+                                <param name="flashvars" value="controls=true&file={{$video->path}}" />
+                                <param name="wmode" value="opaque">
+                            </object>
+                        </video>
+                        @endif
+                    </div>
+                    <div class="box-footer">
+                        <div class="btn-group">
+                            <div class="dropup">
+                              <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
+                                {{t('videoconverter::strings.convert_to')}}
+                                <span class="caret"></span>
+                              </button>
+                              <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                <li role="presentation" class="dropdown-header">{{t('strings.please_select')}}</li>
+                                <li role="presentation"><a @if($video->type!='video/mpeg')href="{{url('backend/videoconverter/convert/'.$video->id.'/mpeg')}}" @endif role="menuitem"  >MPEG</a></li>
+                                <li role="presentation"><a @if($video->type!='video/mp4')href="{{url('backend/videoconverter/convert/'.$video->id.'/mp4')}}" @endif role="menuitem"  >MP4</a></li>
+                                <li role="presentation"><a @if($video->type!='video/webm')href="{{url('backend/videoconverter/convert/'.$video->id.'/webm')}}" @endif>WebM</a></li>
+                                <li role="presentation"><a @if($video->type!='video/wmv')href="{{url('backend/videoconverter/convert/'.$video->id.'/wmv')}}" @endif>WMV</a></li>
+                                <li role="presentation"><a @if($video->type!='video/ogg')href="{{url('backend/videoconverter/convert/'.$video->id.'/ogg')}}" @endif role="menuitem">Ogg</a></li>
+
+                              </ul>
+                            </div>
+
+                        </div>
+                        <a href="http://devhost.dev/LaraPress/backend/videoconverter/resize/{{$video->id}}" data-title="New size (eg: 700x300)" class="btn btn-info dialog-submitter">
+
+                            {{t('videoconverter::strings.resize')}}
+                        </a>
+                        <a href="http://devhost.dev/LaraPress/backend/videoconverter/watermark/{{$video->id}}" data-title="Default:{{get_config_value('brand')}}" class="btn btn-info dialog-submitter">
+
+                            {{t('videoconverter::strings.watermark')}}
+                        </a>
+                        <a href="http://devhost.dev/LaraPress/backend/videoconverter/frames/{{$video->id}}" data-title="Specify seconds eg: 3,15,160" class="btn btn-info dialog-submitter">
+
+                            {{t('videoconverter::strings.frames')}}
+                        </a>
+                    </div>
+                </div>
+                @endforeach
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
